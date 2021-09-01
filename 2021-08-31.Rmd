@@ -1,0 +1,57 @@
+---
+title: "2021-08-31"
+author: "Scout Leonard"
+date: "8/31/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidytuesdayR)
+library(tidyverse)
+library(skimr)
+library(paletteer)
+```
+
+```{r}
+#read in the data
+
+tuesdata <- tidytuesdayR::tt_load('2021-08-31')
+
+bird_baths <- tuesdata$bird_baths
+```
+
+```{r}
+#look at the data
+skim(bird_baths)
+
+dim(bird_baths)
+
+names(bird_baths)
+
+summary(bird_baths)
+```
+
+```{r}
+bird_plot_cleaning <- bird_baths %>% 
+  group_by(bioregions, urban_rural) %>% 
+  summarize(num_birds = sum(bird_count), na.rm = TRUE) %>% 
+  subset(bioregions != "NA")
+  
+```
+
+```{r}
+ggplot(bird_plot_cleaning, aes(y = bioregions, x = num_birds)) +
+  geom_bar(aes(fill = urban_rural), stat = 'identity') +
+  labs(title = "Bird Counts By Bioregion",
+       subtitle = "2014-2015 bird counts by Australian bioregions",
+       x = "Number of Birds Counted",
+       y = "Bioregion",
+       fill = "Environment Type") +
+  theme_light() +
+  scale_fill_paletteer_d(palette = "colorblindr::OkabeIto") 
+```
+
+
+
