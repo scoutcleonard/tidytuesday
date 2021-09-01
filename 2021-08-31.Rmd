@@ -34,14 +34,13 @@ summary(bird_baths)
 ```
 
 ```{r}
+#group by bioregion and environment type
 bird_plot_cleaning <- bird_baths %>% 
   group_by(bioregions, urban_rural) %>% 
   summarize(num_birds = sum(bird_count), na.rm = TRUE) %>% 
   subset(bioregions != "NA")
   
-```
-
-```{r}
+#visualization
 ggplot(bird_plot_cleaning, aes(y = bioregions, x = num_birds)) +
   geom_bar(aes(fill = urban_rural), stat = 'identity') +
   labs(title = "Bird Counts By Bioregion",
