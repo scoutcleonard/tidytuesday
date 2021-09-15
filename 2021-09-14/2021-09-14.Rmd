@@ -1,0 +1,42 @@
+---
+title: "Tidy Tuesday 2021-09-14"
+author: "Scout Leonard"
+date: "9/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(lubridate)
+library(tidytuesdayR)
+library(tidyverse)
+library(skimr)
+library(paletteer)
+```
+
+```{r}
+#read in the data
+tuesdata <- tidytuesdayR::tt_load('2021-09-14')
+```
+```{r}
+# look at the first dataset, billboard
+
+billboard <- tuesdata$billboard
+
+summary(billboard)
+
+skim(billboard)
+
+dim(billboard)
+
+names(billboard)
+```
+
+```{r}
+# look at the second dataset, audio_features
+
+audio_features <- tuesdata$audio_features
+
+```
+
