@@ -9,17 +9,6 @@ output:
    toc_float: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-
-library(lubridate)
-library(tidytuesdayR)
-library(tidyverse)
-library(skimr)
-library(paletteer)
-library(gt)
-library(broom)
-```
 
 These Tidy Tuesday analyses and visualizations come from the [Tidy Tuesday Github repository for September 14, 2021](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-09-14). The data in the repository comes from [Data.World](Data.World) through Sean Miller, [Billboard.com](Billboard.com) and Spotify. 
 
@@ -33,14 +22,24 @@ I'm not at the same level of fandom as I was in 9th grade:
 
 ![](1989.JPG)
 
-![](1989_mom.jpg)
-
 
 ...but I do still listen excitedly when Taylor Swift releases new music and feel nostalgic joy for all of my old favorite songs, from the the slow ballads, like (the **best Swift song of all time**) [All Too Well](https://www.youtube.com/watch?v=F8Jxo15Vfic), to the beltable favorites, like [You Belong With Me](https://www.youtube.com/watch?v=VuNIsY6JdUw). 
 
-When I saw that this Tidy Tuesday dataset was rich with TSwift data, I knew it would be fun for me to practice my data wrangling and visualizations with it. What follows are analyses of Taylor Swift songs by album and by audio features. Hopefully fellow Swifty data scientists will find it as fun as I do! 
+When I saw that this Tidy Tuesday dataset was rich with TSwift data, I knew it would be fun for me to practice my data wrangling and visualizations with it. What follows are analyses of Taylor Swift songs by album and by audio features. Hopefully fellow Swifty data scientists will find it as _fearless_, _enchanted_, and _wonderstruck_ as I do! 
 
-# Read in Data
+# Load Libraries and Read in Data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(lubridate)
+library(tidytuesdayR)
+library(tidyverse)
+library(skimr)
+library(paletteer)
+library(gt)
+library(broom)
+```
 
 ```{r results='hide'}
 #read in the data
@@ -51,10 +50,15 @@ tuesdata <- tidytuesdayR::tt_load('2021-09-14')
 audio_features <- tuesdata$audio_features
 ```
 
-# Wrangle the `audio_features` dataframe for Taylor Swift data
+# Wrangle `audio_features` data for Taylor Swift data
 
+The `audio_features` dataset has contains the audio features of nearly 30,000 songs. I'm not sure how the songs were selcted, but in exploring the data, the observation include work from Louis Armstrong to Beyonce Knowles to Dolly Parton to U2. Because I am only interested in Taylor Swift's music for this analysis, I filtered for only her music below. 
+
+Taylor Swift has lots of oddball singles and deluxe albums featuring bonus tracks, which I thought would muddy the data by 1.) including duplicate songs from original albums _and_ their deluxe versions and 2.) giving too many albums to compare, and albums that are not truly representative of Taylor's various "eras." Her Christmas album, for example, would not be interesting to compare to her main body of work, nor would her singles from the Hunger Games soundtrack. I stick to the main 9 albums here, in chronological order: _Taylor Swift, Fearless, Speak Now, Red, 1989, reputation, Lover, folklore, and evermore._ 
+
+Filtering for the more recent two albums, _folklore_ and _evermore_, was difficult because the formatting of the data changed between _Lover_ and _folklore_. Instead of simply the album names, the `spotify_track_album` column began to include url-like strings of nonsense that did not resemble an album name. I used the function `grepl()` to specify a string within that nonsense, the actual title names, and pull the songs from those albums into my dataset. I then mutated them using `str_detect()` and replaced them with simply the album name!
 ```{r}
-#create a taylor swift subset
+#create a taylor swift subset with desired albums
 tswift_data <- audio_features %>% 
   filter(performer == "Taylor Swift") %>% 
   filter(spotify_track_album == "Taylor Swift" |
@@ -67,6 +71,7 @@ tswift_data <- audio_features %>%
            grepl("folklore", spotify_track_album) | 
            grepl("evermore", spotify_track_album)) 
 
+#rename folklore and evermore occurances to simply the album names
 tswift_data <- tswift_data %>% 
   mutate(spotify_track_album = case_when(
     str_detect(spotify_track_album, "folklore") ~ "folklore",
@@ -75,8 +80,11 @@ tswift_data <- tswift_data %>%
   ))
 ```
 
+Then, I made a new dataframe, `data_by_album`, with a `group_by()` album name and `summarize()` to return mean audio features for each album. This prepared a dataset I could use to compare sound qualities across Swift's discography.
 
+I also defined levels for the albums based on year of release. This way, the albums would appear in chronological order in my visualizations, which made more sense in my Swifty brain for comparing all 9 albums. 
 ```{r}
+#group by album and summarize mean audio features per album
 data_by_album <- tswift_data %>%
   group_by(spotify_track_album) %>% 
   summarise(mean_danceability = mean(danceability),
@@ -91,6 +99,7 @@ data_by_album <- tswift_data %>%
             mean_tempo = mean(tempo),
             mean_popularity = mean(spotify_track_popularity))
 
+#define levels based on album chronology 
 data_by_album$spotify_track_album = factor(data_by_album$spotify_track_album,
                                            levels = c("Taylor Swift",
                                                       "Fearless",
@@ -103,9 +112,19 @@ data_by_album$spotify_track_album = factor(data_by_album$spotify_track_album,
                                                      "evermore"))
 ```
 
-## Data Viz
+## Data Viz and Analysis
 
-I used the Google Chrome plugin "color picker," to pick colors from the album are of each of Taylor's albumn for use in these data visualizations. If you don't like the color schemes, you'll have to talk to the Swift franchise; sorry! 
+### "Swift" Facts
+
+For the non-Swifies, I am putting a summary of fast facts in a table here. If you are not excited at the idea of thinking about Taylor Swift's music across 9! entire! albums! You can get the worst and greatest hits here and bail from this blog post like Joe Jonas dumping Taylor Swift via text message in 2008.
+
+```{r}
+
+```
+
+### Some More Extensive Exploration!
+
+I used the Google Chrome plugin "color picker," to pick colors from the album art of each of Taylor's albums for use in these data visualizations. If you don't like the color schemes, you'll have to talk to the Swift franchise; sorry! 
 ```{r}
 album_cols <- c("#0BA5D7", "#D8BD7D", "#7D4884", "#AE1848", "#96818F", "#0A0A0A", "#FEB5DC", "#919191", "#D85F2E")
 ```
@@ -233,8 +252,6 @@ summary(ols_acousticness) %>%
 
 
 ```{r}
-ols_acousticness <- lm(data = tswift_data, spotify_track_popularity ~ acousticness)
-
 ggplot(data = tswift_data, aes(x = acousticness, y = spotify_track_popularity)) +
   geom_point(color = "#AE1848") +
   geom_line(data = ols_acousticness, aes(y = .fitted)) +
@@ -243,7 +260,21 @@ ggplot(data = tswift_data, aes(x = acousticness, y = spotify_track_popularity)) 
        x = "Acousticness",
        y = "Spotify Track Popularity")
 ```
+```{r}
+ols_speechiness <- lm(data = tswift_data, spotify_track_popularity ~ speechiness)
 
-
+summary(ols_speechiness) %>% 
+  tidy() %>% 
+  gt()
+```
+```{r}
+ggplot(data = tswift_data, aes(x = speechiness, y = spotify_track_popularity)) +
+  geom_point(color = "#AE1848") +
+  geom_line(data = ols_speechiness, aes(y = .fitted)) +
+  theme_minimal() +
+  labs(title = "Popularity of Taylor Swift Songs by Speechiness",
+       x = "Speechiness",
+       y = "Spotify Track Popularity")
+```
 
 
