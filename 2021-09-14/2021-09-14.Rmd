@@ -2,11 +2,15 @@
 title: "Tidy Tuesday 2021-09-14"
 author: "Scout Leonard"
 date: "9/15/2021"
-output: html_document
+output: 
+  html_document:
+   theme: flatly
+   code_folding: show
+   toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 library(lubridate)
 library(tidytuesdayR)
@@ -15,50 +19,41 @@ library(skimr)
 library(paletteer)
 ```
 
-```{r}
+These Tidy Tuesday analyses and visualizations come from the [Tidy Tuesday Github repository for September 14, 2021](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-09-14). The data in the repository comes from [Data.World](Data.World) through Sean Miller, [Billboard.com](Billboard.com) and Spotify. 
+
+# Read in Data
+
+```{r results='hide'}
 #read in the data
 tuesdata <- tidytuesdayR::tt_load('2021-09-14')
 ```
-```{r}
-# look at the first dataset, billboard
-
-billboard <- tuesdata$billboard
-
-summary(billboard)
-
-skim(billboard)
-
-dim(billboard)
-
-names(billboard)
-```
 
 ```{r}
-# look at the second dataset, audio_features
-
 audio_features <- tuesdata$audio_features
-
-summary(audio_features)
-
-skim(audio_features)
-
-dim(audio_features)
-
-names(audio_features)
 ```
+
+# Wrangle the `audio_features` dataframe for Taylor Swift data
+
 ```{r}
 #create a taylor swift subset
-
-class(audio_features$spotify_track_album)
-
 tswift_data <- audio_features %>% 
   filter(performer == "Taylor Swift") %>% 
-  filter(spotify_track_album == "Taylor Swift" | spotify_track_album == "Fearless" | spotify_track_album == "Speak Now" | spotify_track_album == "Red" | spotify_track_album == "1989" | spotify_track_album == "reputation" | spotify_track_album == "Lover" | grepl("folklore", spotify_track_album) | grepl("evermore", spotify_track_album)) 
+  filter(spotify_track_album == "Taylor Swift" |
+           spotify_track_album == "Fearless" | 
+           spotify_track_album == "Speak Now" | 
+           spotify_track_album == "Red" | 
+           spotify_track_album == "1989" | 
+           spotify_track_album == "reputation" | 
+           spotify_track_album == "Lover" | 
+           grepl("folklore", spotify_track_album) | 
+           grepl("evermore", spotify_track_album)) 
 
-unique(tswift_data$spotify_track_album)
-
-#tswift_data[tswift_data$spotify_track_album == "{'album_type': 'album', 'artists': [{'external_urls': {'spotify': 'https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02'}, 'href': 'https://api.spotify.com/v1/artists/06HL4z0CvFAxyc27GXpf02', 'id': '06HL4z0CvFAxyc27GXpf02', 'name': 'Taylor Swift', 'type': 'artist', 'uri': 'spotify:artist:06HL4z0CvFAxyc27GXpf02'}], 'available_markets': ['AD', 'AE', 'AG', 'AL', 'AM', 'AO', 'AR', 'AT', 'AU', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BN', 'BO', 'BR', 'BS', 'BT', 'BW', 'BY', 'BZ', 'CA', 'CH', 'CI', 'CL', 'CM', 'CO', 'CR', 'CV', 'CW', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'ES', 'FI', 'FJ', 'FM', 'FR', 'GA', 'GB', 'GD', 'GE', 'GH', 'GM', 'GN', 'GQ', 'GR', 'GT', 'GW', 'GY', 'HK', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IN', 'IS', 'IT', 'JM', 'JO', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KR', 'KW', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'MA', 'MC', 'MD', 'ME', 'MG', 'MH', 'MK', 'ML', 'MN', 'MO', 'MR', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NE', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NZ', 'OM', 'PA', 'PE', 'PG', 'PH', 'PK', 'PL', 'PS', 'PT', 'PW', 'PY', 'QA', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SE', 'SG', 'SI', 'SK', 'SL', 'SM', 'SN', 'SR', 'ST', 'SV', 'SZ', 'TD', 'TG', 'TH', 'TL', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'US', 'UY', 'UZ', 'VC', 'VN', 'VU', 'WS', 'XK', 'ZA', 'ZM', 'ZW'], 'external_urls': {'spotify': 'https://open.spotify.com/album/2Xoteh7uEpea4TohMxjtaq'}, 'href': 'https://api.spotify.com/v1/albums/2Xoteh7uEpea4TohMxjtaq', 'id': '2Xoteh7uEpea4TohMxjtaq', 'images': [{'height': 640, 'url': 'https://i.scdn.co/image/ab67616d0000b27333b8541201f1ef38941024be', 'width': 640}, {'height': 300, 'url': 'https://i.scdn.co/image/ab67616d00001e0233b8541201f1ef38941024be', 'width': 300}, {'height': 64, 'url': 'https://i.scdn.co/image/ab67616d0000485133b8541201f1ef38941024be', 'width': 64}], 'name': 'evermore', 'release_date': '2020-12-11', 'release_date_precision': 'day', 'total_tracks': 15, 'type': 'album', 'uri': 'spotify:album:2Xoteh7uEpea4TohMxjtaq'}"] <- "evermore"
-
+tswift_data <- tswift_data %>% 
+  mutate(spotify_track_album = case_when(
+    str_detect(spotify_track_album, "folklore") ~ "folklore",
+    str_detect(spotify_track_album, "evermore") ~ "evermore",
+    TRUE ~ spotify_track_album
+  ))
 ```
 
 
@@ -76,6 +71,111 @@ data_by_album <- tswift_data %>%
             mean_valence =  mean(valence),
             mean_tempo = mean(tempo))
 
-
+data_by_album$spotify_track_album = factor(data_by_album$spotify_track_album,
+                                           levels = c("Taylor Swift",
+                                                      "Fearless",
+                                                      "Speak Now",
+                                                      "Red",
+                                                      "1989",
+                                                     "reputation",
+                                                     "Lover",
+                                                     "folklore",
+                                                     "evermore"))
 ```
+
+## Data Viz
+
+I used the Google Chrome plugin "color picker," to pick colors from the album are of each of Taylor's albumn for use in these data visualizations. If you don't like the color schemes, you'll have to talk to the Swift franchise; sorry! 
+```{r}
+album_cols <- c("#0BA5D7", "#D8BD7D", "#7D4884", "#AE1848", "#96818F", "#0A0A0A", "#FEB5DC", "#919191", "#D85F2E")
+```
+
+
+```{r}
+danceability <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_danceability)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Danceability of Taylor Swift Albums",
+       x = "Album Title",
+       y = "Mean Danceability") +
+  scale_fill_manual(values = album_cols)
+
+danceability
+```
+```{r}
+energy <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_energy)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Energy of Taylor Swift Albums",
+       x = "Album Title",
+       y = "Mean Energy") +
+  scale_fill_manual(values = album_cols)
+
+energy
+```
+
+```{r}
+key <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_key)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Key of Taylor Swift Albums",
+       x = "Album Title",
+       y = "Mean Key") +
+  scale_fill_manual(values = album_cols)
+
+key
+```
+
+```{r}
+loudness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_loudness)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Loudness of Taylor Swift Albums",
+       x = "Album Title",
+       y = "Mean Loudness") +
+  scale_fill_manual(values = album_cols)
+
+loudness
+```
+```{r}
+speechiness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_speechiness)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Speechiness of Taylor Swift Albums",
+       x = "Album Title",
+       y = "Mean Speechiness") +
+  scale_fill_manual(values = album_cols)
+
+speechiness
+```
+
+```{r}
+ols_danceability <- lm(data = tswift_data, spotify_track_popularity ~ danceability)
+
+ggplot(data = tswift_data, aes(x = danceability, y = spotify_track_popularity)) +
+  geom_point(aes(color = spotify_track_album)) +
+  geom_line(data = ols_danceability, aes(y = .fitted)) +
+  theme_minimal() +
+  labs(title = "Popularity of Taylor Swift Songs by Danceability",
+       x = "Danceability",
+       y = "Spotify Track Popularity")
+```
+
+```{r}
+ols_tempo <- lm(data = tswift_data, spotify_track_popularity ~ tempo)
+
+ggplot(data = tswift_data, aes(x = tempo, y = spotify_track_popularity)) +
+  geom_point() +
+  geom_line(data = ols_tempo, aes(y = .fitted))
+```
+
+
+
+
+
 
