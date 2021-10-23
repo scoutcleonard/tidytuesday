@@ -1,7 +1,7 @@
 ---
-title: "Tidy Tuesday 2021-09-14"
+title: "TAYLOR Tidy Tuesday"
 author: "Scout Leonard"
-date: "9/15/2021"
+date: ""
 output: 
   html_document:
    theme: flatly
@@ -17,9 +17,28 @@ library(tidytuesdayR)
 library(tidyverse)
 library(skimr)
 library(paletteer)
+library(gt)
+library(broom)
 ```
 
 These Tidy Tuesday analyses and visualizations come from the [Tidy Tuesday Github repository for September 14, 2021](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-09-14). The data in the repository comes from [Data.World](Data.World) through Sean Miller, [Billboard.com](Billboard.com) and Spotify. 
+
+I turned 13 years old in the year 2008. This is the same year Taylor Swift's second album, **Fearless** was released to the world. Taylor wrote and recorded the lyrics, bursting with fairytale imagery and the highs and lows of life as a teenage girl. I was _smitten._ As a teenager, I came to know every lyric of every song and plastered my room in imgages of Swift pulled from magazines. 
+
+I'm not at the same level of fandom as I was in 9th grade: 
+
+![](speaknow.jpg)
+
+...or even my freshman year of college: 
+
+![](1989.JPG)
+
+![](1989_mom.jpg)
+
+
+...but I do still listen excitedly when Taylor Swift releases new music and feel nostalgic joy for all of my old favorite songs, from the the slow ballads, like (the **best Swift song of all time**) [All Too Well](https://www.youtube.com/watch?v=F8Jxo15Vfic), to the beltable favorites, like [You Belong With Me](https://www.youtube.com/watch?v=VuNIsY6JdUw). 
+
+When I saw that this Tidy Tuesday dataset was rich with TSwift data, I knew it would be fun for me to practice my data wrangling and visualizations with it. What follows are analyses of Taylor Swift songs by album and by audio features. Hopefully fellow Swifty data scientists will find it as fun as I do! 
 
 # Read in Data
 
@@ -69,7 +88,8 @@ data_by_album <- tswift_data %>%
             mean_instrumentalness = mean(instrumentalness),
             mean_liveness = mean(liveness),
             mean_valence =  mean(valence),
-            mean_tempo = mean(tempo))
+            mean_tempo = mean(tempo),
+            mean_popularity = mean(spotify_track_popularity))
 
 data_by_album$spotify_track_album = factor(data_by_album$spotify_track_album,
                                            levels = c("Taylor Swift",
@@ -153,28 +173,76 @@ speechiness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mea
 
 speechiness
 ```
+```{r}
+popularity <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_popularity)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Popularity of Taylor Swift Albums",
+       x = "Album Title",
+       y = "Mean Popularity") +
+  scale_fill_manual(values = album_cols)
+
+popularity
+```
+
 
 ```{r}
 ols_danceability <- lm(data = tswift_data, spotify_track_popularity ~ danceability)
 
+summary(ols_danceability) %>% 
+  tidy() %>% 
+  gt()
+```
+
+
+```{r}
 ggplot(data = tswift_data, aes(x = danceability, y = spotify_track_popularity)) +
-  geom_point(aes(color = spotify_track_album)) +
+  geom_point(color = "#AE1848") +
   geom_line(data = ols_danceability, aes(y = .fitted)) +
   theme_minimal() +
   labs(title = "Popularity of Taylor Swift Songs by Danceability",
        x = "Danceability",
        y = "Spotify Track Popularity")
 ```
-
 ```{r}
 ols_tempo <- lm(data = tswift_data, spotify_track_popularity ~ tempo)
 
+summary(ols_tempo) %>% 
+  tidy() %>% 
+  gt()
+```
+
+```{r}
 ggplot(data = tswift_data, aes(x = tempo, y = spotify_track_popularity)) +
-  geom_point() +
-  geom_line(data = ols_tempo, aes(y = .fitted))
+  geom_point(color = "#AE1848") +
+  geom_line(data = ols_tempo, aes(y = .fitted)) +
+  theme_minimal() +
+  labs(title = "Popularity of Taylor Swift Songs by Tempo",
+       x = "Tempo",
+       y = "Spotify Track Popularity")
+```
+
+```{r}
+ols_acousticness <- lm(data = tswift_data, spotify_track_popularity ~ acousticness)
+
+summary(ols_acousticness) %>% 
+  tidy() %>% 
+  gt()
 ```
 
 
+```{r}
+ols_acousticness <- lm(data = tswift_data, spotify_track_popularity ~ acousticness)
+
+ggplot(data = tswift_data, aes(x = acousticness, y = spotify_track_popularity)) +
+  geom_point(color = "#AE1848") +
+  geom_line(data = ols_acousticness, aes(y = .fitted)) +
+  theme_minimal() +
+  labs(title = "Popularity of Taylor Swift Songs by Acousticness",
+       x = "Acousticness",
+       y = "Spotify Track Popularity")
+```
 
 
 
