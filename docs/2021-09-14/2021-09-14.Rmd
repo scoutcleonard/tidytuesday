@@ -18,12 +18,11 @@ I'm not at the same level of fandom as I was in 9th grade:
 
 ![](speaknow.jpg)
 
-...or even my freshman year of college: 
+... but I still feel like this:
 
-![](1989.JPG)
+![](swift_gif.gif)
 
-
-...but I do still listen excitedly when Taylor Swift releases new music and feel nostalgic joy for all of my old favorite songs, from the the slow ballads, like (the **best Swift song of all time**) [All Too Well](https://www.youtube.com/watch?v=F8Jxo15Vfic), to the beltable favorites, like [You Belong With Me](https://www.youtube.com/watch?v=VuNIsY6JdUw). 
+when Taylor releases new music! 
 
 When I saw that this Tidy Tuesday dataset was rich with TSwift data, I knew it would be fun for me to practice my data wrangling and visualizations with it. What follows are analyses of Taylor Swift songs by album and by audio features. Hopefully fellow Swifty data scientists will find it as _fearless_, _enchanted_, and _wonderstruck_ as I do! 
 
@@ -39,6 +38,7 @@ library(skimr)
 library(paletteer)
 library(gt)
 library(broom)
+library(tayloRswift)
 ```
 
 ```{r results='hide'}
@@ -48,6 +48,38 @@ tuesdata <- tidytuesdayR::tt_load('2021-09-14')
 
 ```{r}
 audio_features <- tuesdata$audio_features
+```
+
+## Audio Features MetaData
+
+```{r}
+#read in csv
+audio_features_metadata <- read.csv("audio_features_metadata.csv")
+```
+
+### Color Schemes 
+
+I used the Google Chrome plugin "color picker," to pick colors from the album art of each of Taylor's albums for use in these data visualizations. If you don't like the color schemes, you'll have to talk to the Swift franchise; sorry! 
+
+```{r}
+album_cols <- c("#0BA5D7", "#D8BD7D", "#7D4884", "#AE1848", "#96818F", "#0A0A0A", "#FEB5DC", "#919191", "#D85F2E")
+```
+
+I used my `album_cols` palette to create this colorful table with the `gt` package. The variables in the `audio_features` dataset are confusing to understand without definitions to refer to. 
+
+```{r}
+audio_features_metadata %>% 
+  gt() %>% 
+  tab_header(
+    title = "Audiofeatures Dataset Variables Defined",
+    subtitle = "Many of the variables used in this dataset are confusing metrics, like 'danceability' - What is that? This table contains definitions  you help you navigate my analyses." 
+  )  %>% 
+  data_color(
+    columns = vars(variable),
+    colors =  scales::col_factor(
+    palette = album_cols,
+    domain = NULL)
+  )
 ```
 
 # Wrangle `audio_features` data for Taylor Swift data
@@ -118,17 +150,37 @@ data_by_album$spotify_track_album = factor(data_by_album$spotify_track_album,
 
 For the non-Swifies, I am putting a summary of fast facts in a table here. If you are not excited at the idea of thinking about Taylor Swift's music across 9! entire! albums! You can get the worst and greatest hits here and bail from this blog post like Joe Jonas dumping Taylor Swift via text message in 2008.
 
+One of the most suspicious results, which made me question the data quality is the difference in loudness between Taylor's most recent albums and all her previous ones. This was surprising considering the genre of the most recent albums. folklore and evermore are folk-inspired. Swift is quoted as describing her feelings from evermore as ones of "quiet conclusion and sort of this weird serenity." 
 ```{r}
+loudness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_loudness)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Loudness of Taylor Swift Albums",
+       subtitle = "(in the color palette of the Fearless album!!",
+       x = "Album Title",
+       y = "Mean Loudness") +
+  scale_fill_taylor(palette = "fearless", guide = "none")
 
+loudness
+```
+
+I showed a few of my friends this project and they asked about the "speechiness" audio features - doesn't Taylor Swift speak in all of her songs? She does _sing_ in all of her songs, but a look at the metadata tells you that "speechiness" is defined as the amount of spoken word on a track. Anything between 0.33 and 0.66 is a mix of singing and speech on a track, and anything more than 0.66 is like 
+```{r}
+speechiness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_speechiness)) +
+  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "Speechiness of Taylor Swift Albums",
+        subtitle = "(in the color palette of the Speak Now album!!",
+       x = "Album Title",
+       y = "Mean Speechiness") +
+  scale_fill_taylor(palette = "speakNow", guide = "none")
+
+speechiness
 ```
 
 ### Some More Extensive Exploration!
-
-I used the Google Chrome plugin "color picker," to pick colors from the album art of each of Taylor's albums for use in these data visualizations. If you don't like the color schemes, you'll have to talk to the Swift franchise; sorry! 
-```{r}
-album_cols <- c("#0BA5D7", "#D8BD7D", "#7D4884", "#AE1848", "#96818F", "#0A0A0A", "#FEB5DC", "#919191", "#D85F2E")
-```
-
 
 ```{r}
 danceability <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_danceability)) +
@@ -136,21 +188,25 @@ danceability <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = me
   theme_minimal() +
   theme(legend.position = "none") +
   labs(title = "Danceability of Taylor Swift Albums",
+        subtitle = "(in the color palette of the Red album!!",
        x = "Album Title",
        y = "Mean Danceability") +
-  scale_fill_manual(values = album_cols)
+  scale_fill_taylor(palette = "Red", guide = "none")
 
 danceability
 ```
+
+
 ```{r}
 energy <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_energy)) +
   geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
   theme_minimal() +
   theme(legend.position = "none") +
   labs(title = "Energy of Taylor Swift Albums",
+      subtitle = "(in the color palette of the 1989 album!!",
        x = "Album Title",
        y = "Mean Energy") +
-  scale_fill_manual(values = album_cols)
+  scale_fill_taylor(palette = "taylor1989", guide = "none")
 
 energy
 ```
@@ -161,46 +217,25 @@ key <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_key)) 
   theme_minimal() +
   theme(legend.position = "none") +
   labs(title = "Key of Taylor Swift Albums",
+       subtitle = "(in the color palette of the Reputation album!!",
        x = "Album Title",
        y = "Mean Key") +
-  scale_fill_manual(values = album_cols)
+  scale_fill_taylor(palette = "reputation", guide = "none")
 
 key
 ```
 
-```{r}
-loudness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_loudness)) +
-  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(title = "Loudness of Taylor Swift Albums",
-       x = "Album Title",
-       y = "Mean Loudness") +
-  scale_fill_manual(values = album_cols)
 
-loudness
-```
-```{r}
-speechiness <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_speechiness)) +
-  geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(title = "Speechiness of Taylor Swift Albums",
-       x = "Album Title",
-       y = "Mean Speechiness") +
-  scale_fill_manual(values = album_cols)
-
-speechiness
-```
 ```{r}
 popularity <- ggplot(data = data_by_album, aes(x = spotify_track_album, y = mean_popularity)) +
   geom_histogram(stat = "identity", aes(fill = spotify_track_album)) +
   theme_minimal() +
   theme(legend.position = "none") +
   labs(title = "Popularity of Taylor Swift Albums",
+       subtitle = "(in the color palette of the Lover album!!",
        x = "Album Title",
        y = "Mean Popularity") +
-  scale_fill_manual(values = album_cols)
+  scale_fill_taylor(palette = "lover", guide = "none")
 
 popularity
 ```
@@ -214,6 +249,13 @@ summary(ols_danceability) %>%
   gt()
 ```
 
+```{r}
+ols_danceability_tempo <- lm(data = tswift_data, spotify_track_popularity ~ danceability + tempo + (danceability * tempo))
+
+summary(ols_danceability_tempo) %>% 
+  tidy() %>% 
+  gt()
+```
 
 ```{r}
 ggplot(data = tswift_data, aes(x = danceability, y = spotify_track_popularity)) +
@@ -224,6 +266,7 @@ ggplot(data = tswift_data, aes(x = danceability, y = spotify_track_popularity)) 
        x = "Danceability",
        y = "Spotify Track Popularity")
 ```
+
 ```{r}
 ols_tempo <- lm(data = tswift_data, spotify_track_popularity ~ tempo)
 
@@ -243,6 +286,16 @@ ggplot(data = tswift_data, aes(x = tempo, y = spotify_track_popularity)) +
 ```
 
 ```{r}
+summ_tempo <- ols_tempo %>% 
+  summary()
+
+summ_tempo
+
+#r^2 = 0.02485
+```
+
+
+```{r}
 ols_acousticness <- lm(data = tswift_data, spotify_track_popularity ~ acousticness)
 
 summary(ols_acousticness) %>% 
@@ -260,6 +313,17 @@ ggplot(data = tswift_data, aes(x = acousticness, y = spotify_track_popularity)) 
        x = "Acousticness",
        y = "Spotify Track Popularity")
 ```
+
+```{r}
+summ_accousticness <- ols_acousticness %>% 
+  summary()
+
+summ_accousticness
+
+#r^2 = 0.09742
+```
+
+
 ```{r}
 ols_speechiness <- lm(data = tswift_data, spotify_track_popularity ~ speechiness)
 
@@ -267,6 +331,19 @@ summary(ols_speechiness) %>%
   tidy() %>% 
   gt()
 ```
+
+```{r}
+summ_speechiness <- ols_speechiness %>% 
+  summary()
+
+summ_speechiness
+
+#r^2 = 0.09066
+```
+
+
+
+
 ```{r}
 ggplot(data = tswift_data, aes(x = speechiness, y = spotify_track_popularity)) +
   geom_point(color = "#AE1848") +
