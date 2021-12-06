@@ -342,8 +342,6 @@ summ_speechiness
 ```
 
 
-
-
 ```{r}
 ggplot(data = tswift_data, aes(x = speechiness, y = spotify_track_popularity)) +
   geom_point(color = "#AE1848") +
