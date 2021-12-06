@@ -12,6 +12,7 @@ library(tidytuesdayR)
 library(tidyverse)
 library(skimr)
 library(paletteer)
+library(here)
 ```
 
 ```{r}
@@ -50,6 +51,9 @@ ggplot(bird_plot_cleaning, aes(y = bioregions, x = num_birds)) +
        fill = "Environment Type") +
   theme_light() +
   scale_fill_paletteer_d(palette = "colorblindr::OkabeIto") 
+
+ggsave("birds.png",
+       path = here("viz"))
 ```
 
 
