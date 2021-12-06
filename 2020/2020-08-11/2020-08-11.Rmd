@@ -14,7 +14,7 @@ library(stringr)
 library(ggimage)
 library(here)
 
-iroh = here("2020-08-11","images", "iroh_2.png")
+iroh = here("2020","2020-08-11","images", "iroh_2.png")
 ```
 
 ```{r}
@@ -43,7 +43,7 @@ id = seq(1:number_characters)
 angle = 90 - 360 * (id) / number_characters
 tea_data$angle = ifelse(angle < -90, angle + 180, angle)
 
-ggplot(data = tea_data) +
+iroh_tt <- ggplot(data = tea_data) +
   geom_segment(aes(x = index,
                    xend = index,
                    y = 0,
@@ -86,6 +86,9 @@ ggplot(data = tea_data) +
         plot.title = element_text(size = 16, face = 'bold'),
         plot.subtitle = element_text(size = 10))
 
+
+ggsave("iroh_tt.png",
+       path = here("viz"))
 ```
 
 
