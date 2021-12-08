@@ -31,7 +31,7 @@ spiders <- spiders %>%
   separate_rows(distribution, sep = ", ") %>% 
   mutate(distribution = str_remove(distribution, '"'))
 
-# standardize coountry names to country name in english
+# standardize country names to country name in english
 spiders$continent <- countrycode(spiders$distribution, origin = "country.name", destination = "continent")
 
 spider_species_country <- spiders %>% 
