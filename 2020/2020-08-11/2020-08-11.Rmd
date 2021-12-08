@@ -35,7 +35,7 @@ tea_data <- avatar %>%
 team_mentions_max = max(tea_data$tea_mentions_sum)
 ```
 
-```{r}
+```{r fig.alt = "Circular bar graph with bar magnitude indicating the number of times Avatar characters said the word 'tea' throughout the series. Iroh likes tea the most, with 17 utterances, followed by Zuko with 8. An image of Iroh is in the center of the graph. "}
 tea_data$index <- 1:nrow(tea_data)
 
 number_characters = nrow(tea_data)

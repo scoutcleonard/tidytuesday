@@ -34,7 +34,7 @@ names(bird_baths)
 summary(bird_baths)
 ```
 
-```{r}
+```{r fig.alt= "Horizontal bar graph shows 10 bioregions of Australia and the number of birds counted at bird baths in those regions. In each bar are color proportions representing environment types of the birds: urban or rural. The Sydney Basin has the high bird counts, nearly 2000 birds, mostly found in urban settings. "}
 #group by bioregion and environment type
 bird_plot_cleaning <- bird_baths %>% 
   group_by(bioregions, urban_rural) %>% 
