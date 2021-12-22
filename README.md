@@ -8,6 +8,7 @@ I do not participate in Tidy Tuesday every week, but when I do, I create a folde
 Below are some of my favorite visualizations with their source code linked for reference.
 
 ![](viz/spicegorls.png)
+[Source code here.](https://github.com/scoutcleonard/tidytuesday/blob/master/docs/2021/2021-12-14/2021-12-14.Rmd)
 
 ![](/viz/world_spiders.png)
 [Source code here.](https://github.com/scoutcleonard/tidytuesday/blob/master/2021/2021-12-07/2021-12-07.Rmd) 
