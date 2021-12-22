@@ -9,6 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 #load libraries
+library(ggplot2)
+library(ggtext)
+library(here)
+library(ggimage)
+library(grid)
+
+spice_png <- here("docs", "2021", "2021-12-14", "images", "spice.png")
 ```
 
 ```{r}
@@ -18,5 +25,64 @@ tuesdata <- tidytuesdayR::tt_load('2021-12-14')
 studio_album_tracks <- tuesdata$studio_album_tracks
 related_artists <- tuesdata$related_artists
 lyrics <- tuesdata$lyrics
+```
+energy if spice girls songs by track 
+
+```{r fig.alt= "Radial bar graph shows the energy of Spice Girls songs with songs from three albums: Forever, Spice and Spice World. Spiceworld appears to have the most energetic songs. "}
+#adding angle for each song
+studio_album_tracks$index <- 1:nrow(studio_album_tracks)
+number_songs = nrow(studio_album_tracks)
+id = seq(1:number_songs)
+angle = 90 - 360 * (id) / number_songs
+studio_album_tracks$angle = ifelse(angle < -90, angle + 180, angle)
+
+#grouping observations by album
+studio_album_tracks$track_id = with(studio_album_tracks, factor(track_id, levels = track_id[order(ave(energy, album_name, FUN = min), energy)]))
+
+pop_palette <- c("#4207F0", "#FE19D3", "#FEFF37")
+
+#base plot                                               
+spicy_plot <- ggplot(data = studio_album_tracks, aes(x = track_id, y = energy, fill = album_name)) +
+  geom_bar(stat = 'identity') +
+  scale_fill_manual(values = pop_palette) +
+  coord_polar() +
+  theme_minimal() +
+  theme(
+    panel.background = element_rect("black"),
+    plot.background = element_rect("black"),
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(), 
+    axis.title = element_blank(),
+    plot.title = element_text(color = "black", size = 15, face = 'bold'),
+    plot.subtitle = element_text(color = "white", size = 9),
+    text = element_text(family = "serif", color = "white"),
+    legend.title = element_text(face = 'bold', color = "#FE19D3")
+  ) +
+  labs(title = "Energy of Spice Girls Songs By Album<br>
+<span style = 'font-size:9pt;'>Numerically, <span style = 'color:#FE19D3;'>Energy</span> is a measure from 0.0 to 1.0 and represents a perceptual \nmeasure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. </span>",
+       fill = "Album") +
+   geom_text(aes(x = id, 
+                 y = energy + 0.2,
+                 label = paste0(track_name, " : ", energy)),
+             font_face = "bold",
+             size = 2,
+             angle = studio_album_tracks$angle,
+             color = "white")
+
+#trying to do markdown stuff
+spicy_plot <- spicy_plot +
+  theme(plot.title = element_textbox_simple(size = 15, lineheight = 1, 
+                                            linetype = 1, #turns on border
+                                            box.color = "black",
+                                            fill = "#FEFF37",
+                                            r = grid::unit(3, "pt"), #radius for rounded corners
+                                            padding = margin(5,5,5,5),
+                                            margin = margin(0,0, 10, 0)))
+
+spicy_plot
+
+ggsave("spicegorls.png",
+       path = here("viz"))
 ```
 
