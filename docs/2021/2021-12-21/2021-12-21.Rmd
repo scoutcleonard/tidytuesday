@@ -1,0 +1,33 @@
+---
+title: "Starbucks Tidy Tuesday"
+author: "Scout Leonard"
+date: "12/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#load libraries
+library(tidyverse)
+```
+
+```{r}
+#load data
+tuesdata <- tidytuesdayR::tt_load('2021-12-21')
+
+#filter data for my viz
+starbs_data <- tuesdata$starbucks %>% 
+  filter(sugar_g != 0) %>% 
+  filter(size == c("grande", "tall", "venti")) %>% 
+  filter(grepl("Frappuccino", product_name))
+```
+
+```{r}
+#plot
+ggplot(data = starbs_data, aes(x = reorder(product_name, sugar_g), y = sugar_g, fill = size)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  coord_flip() +
+  theme_minimal()
+```
+
