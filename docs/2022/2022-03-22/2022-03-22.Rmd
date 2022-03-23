@@ -1,0 +1,72 @@
+---
+title: "tidy tuesday 2022-03-22"
+author: "Scout Leonard"
+date: "3/22/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Libraries 
+
+```{r}
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+librarian::shelf(tidyverse,
+                 here,
+                 sysfonts,
+                 showtext,
+                 glue)
+```
+
+
+# Read in Data
+
+```{r}
+babynames <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-03-22/babynames.csv')
+```
+
+```{r}
+scout <- babynames %>% 
+  filter(name == "Scout") %>% 
+  filter(sex == "F")
+```
+
+```{r}
+font_add_google("EB Garamond", "serif")
+showtext_auto()
+```
+
+```{r}
+book <- glue("The novel, 'To Kill a Mockingbird,'",
+             "by Harper Lee, was published in 1960.")
+
+movie <- glue("The film version was released in 1962.")
+
+celeb <- glue("Bruce Willis and Demi Moore name their baby girl",
+              "'Scout' in 1992.")
+```
+
+
+```{r}
+ggplot(data = scout, aes(x = year, y = prop)) +
+  geom_line() + 
+  geom_vline(xintercept = 1960) +
+  geom_vline(xintercept = 1962) +
+  geom_vline(xintercept = 1991) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_continuous(breaks = seq(1950, 2020, 10)) +
+  theme_minimal() +
+  labs(title = "From Scout Finch to Scout Willis: Babies Named Scout in the U.S.",
+       x = "Year",
+       y = "Babies Named Scout") +
+  theme(plot.margin = margin(rep(15, 4)),
+        plot.background = element_rect(fill = "#EFE4EC")) +
+  annotate(geom = "point", x = 1960, y = 0.01,
+           size = 5)
+```
+
