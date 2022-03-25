@@ -48,6 +48,7 @@ scout <- babynames %>%
 #               "'Scout' in 1992.")
 ```
 
+I manually use colors from the MetBrewer colorblind-friendly color palette, "Demuth." 
 
 ```{r}
 ggplot(data = scout, aes(x = year, y = n)) +
