@@ -18,7 +18,8 @@ if (!require(librarian)){
 }
 librarian::shelf(tidyverse,
                  here,
-                 MetBrewer)
+                 MetBrewer,
+                 showtext)
 ```
 
 # Read in Data
@@ -34,18 +35,8 @@ scout <- babynames %>%
 ```
 
 ```{r}
-# font_add_google("EB Garamond", "serif")
-# showtext_auto()
-```
-
-```{r}
-# book <- glue("The novel, 'To Kill a Mockingbird,'",
-#              "by Harper Lee, was published in 1960.")
-# 
-# movie <- glue("The film version was released in 1962.")
-# 
-# celeb <- glue("Bruce Willis and Demi Moore name their baby girl",
-#               "'Scout' in 1992.")
+font_add_google("EB Garamond")
+showtext_auto()
 ```
 
 I manually use colors from the MetBrewer colorblind-friendly color palette, "Demuth." 
@@ -64,26 +55,28 @@ ggplot(data = scout, aes(x = year, y = n)) +
   theme(plot.margin = margin(rep(15, 4)),
         plot.background = element_rect(fill = "#b9b9b8"),
         panel.grid = element_line(color = "#b9b9b8"),
-        plot.title = element_text(size = 20, hjust = 0.5, color = "#41485f"),
-        plot.subtitle = element_text(hjust = 0.5, color = "#41485f"),
-        axis.title = element_text(color = "#41485f")) +
+        plot.title = element_text(size = 20, hjust = 0.5, color = "#41485f", family = "EB Garamond"),
+        plot.subtitle = element_text(hjust = 0.5, color = "#41485f", family = "EB Garamond"),
+        axis.title = element_text(color = "#41485f", family = "EB Garamond")) +
   geom_text(x = 1963, 
             y = 225, 
             label = "The novel, 'To Kill a Mockingbird \nby Harper Lee, was published in 1960.", 
             color = "#9b332b",
             hjust = 0, 
-            size = 3) +
+            size = 3,
+            family = "EB Garamond") +
   geom_text(x = 1963, 
             y = 195, 
             label = "The film version followed shortly \n after in 1962.",
             color = "#b64f32",
             size = 3,
-            hjust = 0) +
+            hjust = 0,
+            family = "EB Garamond") +
   geom_text(x = 1992,
             y = 195,
             label = "In 1991, Demi Moore and Bruce Willis \nname their baby 'Scout.'",
             color = "#d39a2d",
             size = 3,
-            hjust = 0)
+            hjust = 0,
+            family = "EB Garamond")
 ```
-
