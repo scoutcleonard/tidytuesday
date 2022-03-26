@@ -19,6 +19,6 @@ Below are some of my favorite visualizations with their source code linked for r
 ![](/viz/birds.png)
 [Source code here.](https://github.com/scoutcleonard/tidytuesday/tree/master/2021/2021-08-31) My first Tidy Tuesday visualization. I won a cupcake for this one in a challenge with my classmates! 
 
-![](/viz/scout_names.png)
+![](/viz/scout_names_tt.png)
 [Source code here.](https://github.com/scoutcleonard/tidytuesday/blob/master/docs/2022/2022-03-22/2022-03-22.Rmd)
 
