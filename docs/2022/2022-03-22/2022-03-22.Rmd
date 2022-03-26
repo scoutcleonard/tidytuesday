@@ -41,42 +41,63 @@ showtext_auto()
 
 I manually use colors from the MetBrewer colorblind-friendly color palette, "Demuth." 
 
-```{r}
+```{r fig.alt = "A line graph shows the popularity of the name 'Scout' in the U.S. over time. The X axis inludes the years 1960-2017, although the name 'Scout' does not gain popularity until the 1990s. There are 3 vertical lines denoting when the name Scout entered popular culture: when 'To Kill a Mockingbird' is published (1960), when the movie is released (1962), and when celebrities Demi Moore and Bruce Willis name thier baby 'Scout' (1992). Seemingly, the celebrity baby has the biggest  impact on baby names."}
+
 ggplot(data = scout, aes(x = year, y = n)) +
   geom_line(color = "#41485f") + 
   geom_vline(xintercept = 1960, color = "#9b332b") +
-  geom_vline(xintercept = 1962, color = "#b64f32") +
-  geom_vline(xintercept = 1991, color = "#d39a2d") +
+  geom_vline(xintercept = 1962, color = "#d39a2d") +
+  geom_vline(xintercept = 1991, color = "#b64f32") +
   theme_minimal() +
   labs(title = "From Haper Lee to Demi Moore:",
        subtitle = "How did Scouts of popular culture influence U.S. baby names?",
        x = "Year",
-       y = "Babies Named Scout") +
-  theme(plot.margin = margin(rep(15, 4)),
+       y = "Babies Named Scout",
+       caption = "Data from the babaynames R package from Hadley Wickham.") +
+  theme(plot.margin = unit(c(1,0.5,0.5,0.5), "cm"),
         plot.background = element_rect(fill = "#b9b9b8"),
         panel.grid = element_line(color = "#b9b9b8"),
-        plot.title = element_text(size = 20, hjust = 0.5, color = "#41485f", family = "EB Garamond"),
-        plot.subtitle = element_text(hjust = 0.5, color = "#41485f", family = "EB Garamond"),
-        axis.title = element_text(color = "#41485f", family = "EB Garamond")) +
+        plot.title = element_text(size = 30, 
+                                  hjust = 0.5, 
+                                  color = "#41485f", 
+                                  family = "EB Garamond"),
+        plot.subtitle = element_text(hjust = 0.5, 
+                                     color = "#41485f",
+                                     size = 15,
+                                     family = "EB Garamond"),
+        axis.title = element_text(color = "#41485f", 
+                                  family = "EB Garamond",
+                                  size = 15),
+        axis.text = element_text(color = "#41485f",
+                                 size = 10,
+                                 family = "EB Garamond"),
+        axis.line = element_line(color = "#41485f"),
+        plot.caption = element_text(color = "#41485f",
+                                    family = "EB Garamond",
+                                    size = 7)) +
   geom_text(x = 1963, 
-            y = 225, 
+            y = 175, 
             label = "The novel, 'To Kill a Mockingbird \nby Harper Lee, was published in 1960.", 
             color = "#9b332b",
             hjust = 0, 
-            size = 3,
+            size = 3.5,
             family = "EB Garamond") +
   geom_text(x = 1963, 
-            y = 195, 
+            y = 135, 
             label = "The film version followed shortly \n after in 1962.",
-            color = "#b64f32",
-            size = 3,
+            color = "#d39a2d",
+            size = 3.5,
             hjust = 0,
             family = "EB Garamond") +
   geom_text(x = 1992,
-            y = 195,
+            y = 240,
             label = "In 1991, Demi Moore and Bruce Willis \nname their baby 'Scout.'",
-            color = "#d39a2d",
-            size = 3,
+            color = "#b64f32",
+            size = 3.5,
             hjust = 0,
-            family = "EB Garamond")
+            family = "EB Garamond") +
+  scale_x_continuous(limits = c(1960, 2017))
+
+ggsave("scout_names_tt.png",
+       path = here("viz"))
 ```
