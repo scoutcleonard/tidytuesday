@@ -1,0 +1,34 @@
+---
+title: "tidy tuesday 2022-06-07"
+author: "Scout Leonard"
+date: "6/07/2022"
+output: html_document
+---
+
+# Load Libraries
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+librarian::shelf(tidyverse,
+                 here,
+                 tidytuesdayR)
+```
+
+# Read in Data
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2022-06-07')
+
+pride_aggregates <- tuesdata$pride_aggregates
+fortune_aggregates <- tuesdata$fortune_aggregates
+static_list <- tuesdata$static_list
+pride_sponsors <- tuesdata$pride_sponsors
+corp_by_politician <- tuesdata$corp_by_politician
+donors <- tuesdata$donors
+```
+
