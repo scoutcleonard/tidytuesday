@@ -16,7 +16,8 @@ if (!require(librarian)){
 }
 librarian::shelf(tidyverse,
                  here,
-                 tidytuesdayR)
+                 tidytuesdayR,
+                 janitor)
 ```
 
 # Read in Data
@@ -24,11 +25,30 @@ librarian::shelf(tidyverse,
 ```{r}
 tuesdata <- tidytuesdayR::tt_load('2022-06-07')
 
-pride_aggregates <- tuesdata$pride_aggregates
-fortune_aggregates <- tuesdata$fortune_aggregates
-static_list <- tuesdata$static_list
-pride_sponsors <- tuesdata$pride_sponsors
-corp_by_politician <- tuesdata$corp_by_politician
-donors <- tuesdata$donors
+pride_aggregates <- tuesdata$pride_aggregates %>% 
+  clean_names()
+
+pride_sponsors <- tuesdata$pride_sponsors %>% 
+  clean_names()
+```
+
+# Join Politicans and Pride Data
+
+```{r}
+events_politicians_joined <- left_join(pride_sponsors, pride_aggregates) %>% 
+  group_by(company) %>% 
+  summarise(politicians_total = sum(number_of_politicians_contributed_to)) %>% 
+  na.omit() %>% 
+  
+```
+
+# Visualize
+
+```{r}
+ggplot(data = events_politicians_joined, aes(x = company, y = politicians_total)) +
+  geom_bar(stat = 'identity') +
+  coord_flip() +
+  facet_wrap(~pride_event_sponsored) +
+  theme_minimal()
 ```
 
