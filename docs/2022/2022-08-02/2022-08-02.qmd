@@ -14,7 +14,9 @@ if (!require(librarian)) {
 }
 
 shelf(tidyverse,
-      here)
+      here,
+      janitor,
+      lubridate)
 ```
 
 # Call Data
@@ -22,8 +24,20 @@ shelf(tidyverse,
 ```{r}
 tuesdata <- tidytuesdayR::tt_load('2022-08-02')
 
-frogs <- tuesdata$frogs
+frogs <- tuesdata$frogs %>% 
+  clean_names() %>% 
+  mutate(survey_date = as.POSIXct(survey_date, format = '%m/%d/%Y'))
+
 ```
 
-#
+# Explore Data
+
+```{r}
+summary(frogs)
+
+unique(frogs$site)
+unique(frogs$subsite)
+unique(frogs$hab_type)
+```
+
 
