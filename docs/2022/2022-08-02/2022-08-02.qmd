@@ -16,7 +16,10 @@ if (!require(librarian)) {
 shelf(tidyverse,
       here,
       janitor,
-      lubridate)
+      lubridate,
+      sf,
+      leaflet,
+      MetBrewer)
 ```
 
 # Call Data
@@ -26,18 +29,33 @@ tuesdata <- tidytuesdayR::tt_load('2022-08-02')
 
 frogs <- tuesdata$frogs %>% 
   clean_names() %>% 
-  mutate(survey_date = as.POSIXct(survey_date, format = '%m/%d/%Y'))
-
+  mutate(survey_date = as.POSIXct(survey_date, format = '%m/%d/%Y')) %>% 
+  st_as_sf(coords = c("utme_83", "utmn_83"), crs = 32610) %>% 
+  st_transform(crs = 4326) %>% 
+  mutate(lat = unlist(map(geometry, 2)),
+         long = unlist(map(geometry, 1)),
+         color = case_when(str_detect(detection, "No visual") ~ "grey",
+                           str_detect(detection, "Captured") ~ "red",
+                           str_detect(detection, "Visual") ~ "blue")) 
 ```
 
-# Explore Data
+# Map
 
 ```{r}
-summary(frogs)
-
-unique(frogs$site)
-unique(frogs$subsite)
-unique(frogs$hab_type)
+frogs_map <- leaflet() %>% 
+  fitBounds(lng1 = min(frogs$long - 0.01),
+            lat1 = min(frogs$lat - 0.01),
+            lng2 = max(frogs$long + 0.01),
+            lat2 = max(frogs$lat + 0.01)) %>% 
+  addProviderTiles("OpenTopoMap") %>% 
+  addCircleMarkers(lng = frogs$long,
+                   lat = frogs$lat,
+                   popup = frogs$subsite,
+                   color = (frogs$detection),
+                   radius = 2) %>% 
+  addLegend(position = "bottomleft",
+            values = ~frogs$detection,
+            pal = palPwr)
 ```
 
 
