@@ -13,13 +13,21 @@ if (!require(librarian)) {
   library(librarian)
 }
 
+library(devtools)
+install_github("wch/webshot")
+
 shelf(tidyverse,
       here,
       janitor,
       lubridate,
       sf,
       leaflet,
-      MetBrewer)
+      MetBrewer,
+      devtools,
+      htmlwidgets,
+      webshot)
+
+webshot(install_phantomjs())
 ```
 
 # Call Data
@@ -34,15 +42,37 @@ frogs <- tuesdata$frogs %>%
   st_transform(crs = 4326) %>% 
   mutate(lat = unlist(map(geometry, 2)),
          long = unlist(map(geometry, 1)),
-         color = case_when(str_detect(detection, "No visual") ~ "grey",
-                           str_detect(detection, "Captured") ~ "red",
-                           str_detect(detection, "Visual") ~ "blue")) 
+         # color = case_when(str_detect(detection, "No visual") ~ "grey",
+         #                   str_detect(detection, "Captured") ~ "red",
+         #                   str_detect(detection, "Visual") ~ "blue")
+         ) 
 ```
 
 # Map
 
+## Site Labels
+
 ```{r}
-frogs_map <- leaflet() %>% 
+site_labels <- frogs %>% 
+  group_by(subsite) %>% 
+  summarise(lat = mean(lat),
+            long = mean(long)) %>% 
+  ungroup()
+```
+
+
+```{r}
+met_palette_detection <- met.brewer(name = "Veronese",
+                                    n = 3)
+met_palette_detection <- as.character(met_palette_detection)
+
+map_cols <- colorFactor(palette = met_palette_detection,
+                        domain = frogs$detection)
+
+frogs_map <- leaflet(frogs,
+                     options = leafletOptions(minZoom = 12,
+                                             maxZoom = 12,
+                                             zoomControl = F)) %>% 
   fitBounds(lng1 = min(frogs$long - 0.01),
             lat1 = min(frogs$lat - 0.01),
             lng2 = max(frogs$long + 0.01),
@@ -50,12 +80,34 @@ frogs_map <- leaflet() %>%
   addProviderTiles("OpenTopoMap") %>% 
   addCircleMarkers(lng = frogs$long,
                    lat = frogs$lat,
-                   popup = frogs$subsite,
-                   color = (frogs$detection),
-                   radius = 2) %>% 
-  addLegend(position = "bottomleft",
-            values = ~frogs$detection,
-            pal = palPwr)
+                   popup = frogs$hab_type,
+                   color = ~map_cols(detection),
+                   fill = ~map_cols(detection),
+                   radius = 2,
+                   fillOpacity = 1) %>%
+  addLabelOnlyMarkers(lng = site_labels$long,
+                      lat = site_labels$lat,
+                      label = site_labels$subsite,
+                      labelOptions = labelOptions(noHide = T,
+                                                  direction = 'left',
+                                                  #textOnly = T
+                                                  )) %>% 
+  addLegend("bottomleft",
+            values = ~detection,
+            pal = map_cols,
+            title = "Detection of Oregon Spotted Frog")
+
 ```
 
+# Save Map
+
+```{r}
+#save html to png
+saveWidget(frogs_map,
+           "temp.html",
+           selfcontained = FALSE)
+webshot("temp.html",
+        file = here("viz/frogs_map.png"),
+        cliprect = "viewport")
+```
 
