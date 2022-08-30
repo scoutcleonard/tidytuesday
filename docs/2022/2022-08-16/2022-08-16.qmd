@@ -1,0 +1,98 @@
+---
+title: "tidy tuesday 2022-08-16"
+author: "Scout Leonard"
+date: "3/22/2022"
+output: html_document
+---
+
+# Load Libraries
+
+```{r load_libs}
+if (!require(librarian)) {
+  install.packages("librarian")
+  library(librarian)
+}
+
+shelf(here,
+      tidyverse,
+      knitr)
+```
+
+# Pull Data
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2022-08-16')
+
+characters <- tuesdata$characters
+psych_stats <- tuesdata$psych_stats
+myers_briggs <- tuesdata$myers_briggs
+```
+
+# EDA
+
+## Characters
+
+### Explore
+
+```{r}
+summary(characters)
+```
+
+What universes are included in the dataset? 
+
+```{r}
+unique(characters$uni_name)
+```
+
+### Process
+
+```{r}
+characters <- characters %>% 
+  filter(uni_name == "Little Women")
+```
+
+
+## Psychology Stats
+
+### Explore
+
+```{r}
+summary(psych_stats)
+```
+
+### Process
+
+```{r}
+psych_stats <- psych_stats %>% 
+  filter(uni_name == "Little Women") %>% 
+  drop_na()
+```
+
+## Myers Briggs
+
+### Explore
+
+```{r}
+summary(myers_briggs)
+```
+
+### Process
+
+```{r}
+myers_briggs <- myers_briggs %>% 
+  filter(uni_name == "Little Women") 
+```
+
+# Viz Time! 
+
+## Fighter or Lover? 
+
+```{r}
+lw_ps <- psych_stats %>% 
+  group_by(char_id, char_name) %>% 
+  pivot_wider(names_from = question,
+              values_from = personality) %>% 
+  ungroup()
+
+```
+

@@ -1,0 +1,88 @@
+---
+title: "tidy tuesday 2022-08-30"
+author: "Scout Leonard"
+date: "8/30/2022"
+output: html_document
+---
+
+# Load Libraries
+
+```{r load_libs}
+if (!require(librarian)) {
+  install.packages("librarian")
+  library(librarian)
+}
+
+shelf(here,
+      tidyverse,
+      ggplot2,
+      geofacet,
+      janitor,
+      extrafont)
+```
+
+# Pull Data
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2022-08-30')
+
+pell <- tuesdata$pell %>% 
+  clean_names()
+```
+
+```{r}
+head(pell)
+```
+
+```{r}
+awards_per_yr <- pell %>% 
+  group_by(state, year) %>% 
+  summarise(average_award = (sum(award) / sum(recipient))) %>% 
+  mutate(state_name = case_when(state == "SA" ~ "American Samoa",
+                                TRUE ~ state.name[match(state,
+                                                        state.abb)]))
+```
+
+
+```{r}
+caption <- "Data from Arafath Hossain's Pell Grant Data Package \nSourced from the U.S. Department of Education \nVisualization by Scout Leonard"
+
+state_pell_plot <- ggplot(data = awards_per_yr,
+                          aes(x = year, y = average_award)) +
+  geom_line() +
+  theme_classic() +
+  facet_geo(~state, label = "name") +
+  theme(axis.text.x = element_text(angle = 90,
+                                   size = 5,
+                                   family = "mono"),
+        plot.title = element_text(size = 20,
+                                  face = "bold",
+                                  hjust = 0.5,
+                                  family = "mono"),
+        axis.text.y = element_text(size = 5,
+                                   family = "mono"),
+        strip.text.x = element_text(size = 4,
+                                    family = "mono",
+                                    face = "bold"),
+        plot.caption = element_text(family = "mono"),
+        axis.title = element_text(face = "bold",
+                                  family = "mono"),
+        strip.background = element_rect(color = "lightcyan3",
+                                        fill = "lightcyan3"),
+        plot.background = element_rect(color = "honeydew1"),
+        plot.subtitle = element_text(family = "mono",
+                                     hjust = 0.5,
+                                     face = "bold")) +
+  labs(title = "Average Pell Award By State",
+       subtitle = "1999 - 2017",
+       y = "Average Award Amount (U.S. Dollars)",
+       x = "Year",
+       caption = caption) 
+
+ggsave(filename = "state_pell_grants.png",
+       path = here("viz"),
+       plot = state_pell_plot,
+       width = 10,
+       height = 7)
+```
+
