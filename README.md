@@ -7,6 +7,11 @@ I do not participate in Tidy Tuesday every week, but when I do, I create a folde
 
 Below are some of my visualizations with their source code linked for reference.
 
+# Pell Grants
+
+![](viz/state_pell_grants.png)
+[Source code here.](https://github.com/scoutcleonard/tidytuesday/blob/master/docs/2022/2022-08-30/2022-08-30.qmd)
+
 # Oregon Spotted Frogs 
 
 ![](viz/frogs_map.png)
