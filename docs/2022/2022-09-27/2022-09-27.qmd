@@ -1,0 +1,77 @@
+---
+title: "tidy tuesday 2022-09-27"
+author: "Scout Leonard"
+date: "9/27/2022"
+output: html_document
+---
+
+# Load Libraries
+
+```{r}
+if (!require(librarian)) {
+  install.packages("librarian")
+  library(librarian)
+}
+
+#devtools::install_github("davidsjoberg/ggsankey")
+
+shelf(tidyverse,
+      here,
+      ggplot2,
+      networkD3,
+      MetBrewer,
+      htmlwidgets)
+```
+
+# Download Data
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2022-09-27')
+
+artists <- tuesdata$artists
+
+glimpse(artists)
+```
+
+# Create Viz
+
+```{r}
+us_artists <- artists %>% 
+  select(race, type, artists_n)
+
+us_types <- us_artists %>% 
+  group_by(type, race) %>%
+  na.omit() %>% 
+  summarise(sum = sum(artists_n)) %>% 
+  rename(source = "type",
+         target = "race",
+         value = "sum")
+
+nodes <- data.frame(name = c(as.character(us_types$source),
+                             as.character(us_types$target)) %>%
+                      unique())
+
+us_types$IDsource = match(us_types$source, nodes$name)-1 
+us_types$IDtarget = match(us_types$target, nodes$name)-1
+
+#palette for sankey network (color values from metbrewer package code)
+met_palette <- 'd3.scaleOrdinal().range(["#b1615c", "#d88782", "#e3aba7", "#edd7d9", "#c9c9dd", "#9d9dc7", "#8282aa", "#5a5a83"])'
+
+#make sankey network
+sankey_widget <- sankeyNetwork(Links = us_types,
+                               Nodes = nodes,
+                               Source = "IDsource",
+                               Target = "IDtarget",
+                               Value = "value",
+                               NodeID = "name",
+                               units = "artists",
+                               sinksRight = FALSE,
+                               colourScale = met_palette,
+                               nodeWidth = 10,
+                               fontSize = 10,
+                               nodePadding = 5,
+                               fontFamily = "Bookman")
+
+saveWidget(widget = sankey_widget,
+           file = here("viz/artists_sankey.html"))
+```

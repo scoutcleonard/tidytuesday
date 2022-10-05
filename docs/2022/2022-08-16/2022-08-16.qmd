@@ -1,7 +1,7 @@
 ---
 title: "tidy tuesday 2022-08-16"
 author: "Scout Leonard"
-date: "3/22/2022"
+date: "08/16/2022"
 output: html_document
 ---
 
