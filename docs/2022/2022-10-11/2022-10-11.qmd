@@ -56,7 +56,7 @@ nrow(yarn_avail)
 
 ### Process Data for Viz: 
 
-Below, I make a list of the companies that Spinrite, Inc., a craft conglomerate, owns. I got this information from [their website](https://www.spinriteyarns.com/about-us).
+Below, I make a list of the companies that Spinrite, Inc., a craft conglomerate, owns. I got this information from [their website](https://www.spinriteyarns.com/about-us). I am curious about which of the top 20 reviewed are Spinrite companies:
 
 ```{r}
 spinrite_inc <- c("Anchor",
