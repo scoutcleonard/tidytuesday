@@ -1,0 +1,145 @@
+---
+title: "tidy tuesday 2022-10-11"
+author: "Scout Leonard"
+date: "10/11/2022"
+output: html_document
+---
+
+# Load Libraries 
+
+```{r}
+if (!require(librarian)) {
+  install.packages("librarian")
+  library(librarian)
+}
+
+shelf(here,
+      tidyverse,
+      ggimage)
+```
+
+
+# Pull Data
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load(2022, week = 41)
+
+yarn <- tuesdata$yarn
+```
+
+# Explore
+
+```{r}
+#all data 
+nrow(yarn)
+#100000
+
+length(unique(yarn$name))
+#72541
+
+# what about yarn i can actually buy?? 
+yarn_avail <- yarn %>% 
+  filter(discontinued == "FALSE")
+
+nrow(yarn_avail)
+```
+
+# Data Viz!
+
+What are the most popular yarns by weight?? 
+
+```{r}
+# yarn_by_wt <- yarn_avail %>% 
+#   group_by(yarn_weight_name) %>% 
+#   arrange(desc(rating_count), desc(rating_average)) %>%
+#   slice(1:5) %>% 
+#   as.data.frame()
+# 
+# unique(yarn_by_wt$yarn_weight_name)
+# 
+# library(dplyr)
+# 
+# yarn_by_wt %>% 
+#   filter(yarn_weight_name %in% c("Aran", "Bulky", "DK", "Fingering",
+#                                  "Jumbo", "Lace", "Sport", "Worsted"))
+```
+
+```{r}
+spinrite_inc <- c("Anchor",
+                  "Aunt Lydia's",
+                  "Bernat",
+                  "Caron",
+                  "Coats & Clark",
+                  "Lily",
+                  "Patons North America",
+                  "Peaches & Creme",
+                  "Phentex",
+                  "Red Heart",
+                  "Susan Bates",
+                  "wonderart")
+
+label <- "Data include the top 20 yarns from Ravelry by total number of ratings.\nTotal number of ratings for yarns range from \n39,000 and 97,000 reviews."
+
+yarn_avail_most_used <- yarn_avail %>% 
+  arrange(desc(rating_count)) %>% 
+  slice(1:20) %>% 
+  mutate(spinrite_inc_owned = ifelse(yarn_company_name %in% spinrite_inc,
+                                "spinrite",
+                                "not spinrite"))
+
+star <- here("docs/2022/2022-10-11/star.png")
+star_2 <- here("docs/2022/2022-10-11/star_2.png")
+
+ggplot(data = yarn_avail_most_used,
+       aes(x = reorder(name, rating_average),
+           y = rating_average,
+           fill = spinrite_inc_owned)) +
+  scale_fill_manual(values = c("#973d21", "#ee956a")) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme_minimal(base_family = "Roboto Condensed") +
+  labs(y = "Average Rating (/5 Stars)",
+       title = "Ravelry's Most Frequently Reviewed Yarns",
+       subtitle = "How Are They Rated?") +
+  geom_image(mapping = aes(y = rating_average + 0.2,
+                 x = name),
+             image = star_2) +
+  geom_text(data = yarn_avail_most_used,
+            mapping = aes(y = rating_average + 0.2,
+                          x = name,
+                          label = rating_average),
+            size = 2,
+            color = "#133e7e") +
+  geom_text(data = yarn_avail_most_used,
+            mapping = aes(y = rating_average / 2,
+                          x = name,
+                          label = paste0(yarn_company_name, " - ", name)),
+            size = 3,
+            color = "white",
+            family = "Roboto") +
+  geom_text(label = label,
+            color = "#133e7e",
+            mapping = aes(y = 4.5,
+                          x = "Wool-Ease"),
+            size = 1) +
+  guides(fill = guide_legend(title = "Owned by Spinrite, Inc.?")) +
+  theme(panel.background = element_rect(fill = "white",
+                                        color = "white"),
+        plot.background = element_rect(fill = "white",
+                                       color = "white"),
+        panel.grid = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.5,
+                                  color = "#133e7e",
+                                  face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5,
+                                  color = "#133e7e"),
+        axis.title.x = element_text(color = "#133e7e"),
+        legend.title = element_text(color = "#133e7e"),
+        legend.text = element_text(color = "#133e7e")) 
+
+```
+
+

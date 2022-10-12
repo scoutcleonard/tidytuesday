@@ -21,4 +21,13 @@ shelf(here,
 
 ```{r}
 tuesdata <- tidytuesdayR::tt_load(2022, week = 40)
+
+product_hunt <- tuesdata$product_hunt
 ```
+
+# Examine Data
+
+```{r}
+glimpse(product_hunt)
+```
+
