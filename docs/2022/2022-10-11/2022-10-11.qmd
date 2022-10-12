@@ -5,7 +5,13 @@ date: "10/11/2022"
 output: html_document
 ---
 
-# Load Libraries 
+# Tidy Tuesday 2022: Week 41
+
+[Tidy Tuesday](https://github.com/rfordatascience/tidytuesday) is a weekly event in which R users summarize and arrange data meaningfully using raw data shared by the [R4DS Online Learning Community](https://r4ds.had.co.nz/index.html).
+
+For this week's Tidy Tuesday, I got to play with Ravelry data! This is especially exciting for me because I am a Ravelry user of ~7 years. I had a joyful time exploring this yarn rating data and thinking about how to visualize it. 
+
+## Load Libraries 
 
 ```{r}
 if (!require(librarian)) {
@@ -19,7 +25,7 @@ shelf(here,
 ```
 
 
-# Pull Data
+## Pull Data
 
 ```{r}
 tuesdata <- tidytuesdayR::tt_load(2022, week = 41)
@@ -27,7 +33,7 @@ tuesdata <- tidytuesdayR::tt_load(2022, week = 41)
 yarn <- tuesdata$yarn
 ```
 
-# Explore
+## Explore Data
 
 ```{r}
 #all data 
@@ -41,28 +47,16 @@ length(unique(yarn$name))
 yarn_avail <- yarn %>% 
   filter(discontinued == "FALSE")
 
+#ok, how much now??
 nrow(yarn_avail)
+#64289
 ```
 
-# Data Viz!
+## Data Viz!
 
-What are the most popular yarns by weight?? 
+### Process Data for Viz: 
 
-```{r}
-# yarn_by_wt <- yarn_avail %>% 
-#   group_by(yarn_weight_name) %>% 
-#   arrange(desc(rating_count), desc(rating_average)) %>%
-#   slice(1:5) %>% 
-#   as.data.frame()
-# 
-# unique(yarn_by_wt$yarn_weight_name)
-# 
-# library(dplyr)
-# 
-# yarn_by_wt %>% 
-#   filter(yarn_weight_name %in% c("Aran", "Bulky", "DK", "Fingering",
-#                                  "Jumbo", "Lace", "Sport", "Worsted"))
-```
+Below, I make a list of the companies that Spinrite, Inc., a craft conglomerate, owns. I got this information from [their website](https://www.spinriteyarns.com/about-us).
 
 ```{r}
 spinrite_inc <- c("Anchor",
@@ -78,29 +72,46 @@ spinrite_inc <- c("Anchor",
                   "Susan Bates",
                   "wonderart")
 
-label <- "Data include the top 20 yarns from Ravelry by total number of ratings.\nTotal number of ratings for yarns range from \n39,000 and 97,000 reviews."
-
 yarn_avail_most_used <- yarn_avail %>% 
   arrange(desc(rating_count)) %>% 
   slice(1:20) %>% 
   mutate(spinrite_inc_owned = ifelse(yarn_company_name %in% spinrite_inc,
-                                "spinrite",
-                                "not spinrite"))
+                                "Yes",
+                                "No"))
+```
 
-star <- here("docs/2022/2022-10-11/star.png")
-star_2 <- here("docs/2022/2022-10-11/star_2.png")
+### Assign plot elements
 
-ggplot(data = yarn_avail_most_used,
+Below, I assign image and text elements to be used as layers in my final plot:
+
+```{r}
+#labels
+label_1 <- "Tidy Tuesday 2022, Week 41 | Data Source: Ravelry | @scoutcleonard"
+
+label_2 <- "Data include the top 20 yarns from Ravelry by total number of ratings.\nNumber of ratings for yarns pictures range from 39,000 to 97,000 reviews. \n Spinrite, Inc. is a craft conglomerate which owns several yarn companies which top yarn use according to Ravelry."
+
+#images
+star <- here("docs/2022/2022-10-11/star_2.png")
+```
+
+### Put it all together!
+
+```{r}
+#base plot
+p <- ggplot(data = yarn_avail_most_used,
        aes(x = reorder(name, rating_average),
            y = rating_average,
            fill = spinrite_inc_owned)) +
   scale_fill_manual(values = c("#973d21", "#ee956a")) +
   geom_bar(stat = "identity") +
   coord_flip() +
-  theme_minimal(base_family = "Roboto Condensed") +
-  labs(y = "Average Rating (/5 Stars)",
+  theme_minimal(base_family = "Roboto Condensed")
+
+p_aesthetic <- p +
+  labs(y = "Average Rating /5 Stars",
        title = "Ravelry's Most Frequently Reviewed Yarns",
-       subtitle = "How Are They Rated?") +
+       subtitle = "How Are They Rated?",
+       caption = c(label_1, label_2)) +
   geom_image(mapping = aes(y = rating_average + 0.2,
                  x = name),
              image = star_2) +
@@ -117,11 +128,6 @@ ggplot(data = yarn_avail_most_used,
             size = 3,
             color = "white",
             family = "Roboto") +
-  geom_text(label = label,
-            color = "#133e7e",
-            mapping = aes(y = 4.5,
-                          x = "Wool-Ease"),
-            size = 1) +
   guides(fill = guide_legend(title = "Owned by Spinrite, Inc.?")) +
   theme(panel.background = element_rect(fill = "white",
                                         color = "white"),
@@ -136,10 +142,23 @@ ggplot(data = yarn_avail_most_used,
                                   face = "bold"),
         plot.subtitle = element_text(hjust = 0.5,
                                   color = "#133e7e"),
-        axis.title.x = element_text(color = "#133e7e"),
+        axis.title.x = element_text(color = "#133e7e",
+                                    face = "bold"),
         legend.title = element_text(color = "#133e7e"),
-        legend.text = element_text(color = "#133e7e")) 
-
+        legend.text = element_text(color = "#133e7e"),
+        plot.caption = element_text(hjust = c(0, 1),
+                                    color = "#133e7e",
+                                    size = 7),
+        legend.position = "left") 
 ```
 
+### Save final Plot
+
+```{r}
+ggsave(plot = p_aesthetic, 
+       filename = "ravelry.png",
+       path = here("viz"),
+       width = 10,
+       height = 7)
+```
 
